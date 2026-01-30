@@ -1,6 +1,8 @@
-[gd_scene load_steps=12 format=3 uid="uid://csm02d86ryv2h"]
+[gd_scene load_steps=17 format=3 uid="uid://csm02d86ryv2h"]
 
 [ext_resource type="Script" uid="uid://bl7t5m7s0cqcx" path="res://main.gd" id="1_main"]
+[ext_resource type="Shader" path="res://left_eye_only.gdshader" id="2_left_shader"]
+[ext_resource type="Shader" path="res://right_eye_only.gdshader" id="3_right_shader"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_capsule"]
 shading_mode = 0
@@ -8,6 +10,22 @@ albedo_color = Color(0.75, 1, 0, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_frame"]
 material = SubResource("StandardMaterial3D_capsule")
+radius = 0.004
+height = 0.3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_left_eye"]
+shader = ExtResource("2_left_shader")
+shader_parameter/albedo = Color(0, 1, 1, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_left_eye"]
+radius = 0.004
+height = 0.3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_right_eye"]
+shader = ExtResource("3_right_shader")
+shader_parameter/albedo = Color(1, 0, 1, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_right_eye"]
 radius = 0.004
 height = 0.3
 
@@ -75,6 +93,29 @@ mesh = SubResource("CapsuleMesh_frame")
 [node name="Right" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/FOVFrame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, -0.5)
 mesh = SubResource("CapsuleMesh_frame")
+
+[node name="OverlapFrame" type="Node3D" parent="XROrigin3D/XRCamera3D"]
+visible = false
+
+[node name="LeftEdgeCyan" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/OverlapFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0, -0.5)
+mesh = SubResource("CapsuleMesh_left_eye")
+material_override = SubResource("ShaderMaterial_left_eye")
+
+[node name="LeftEdgeMagenta" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/OverlapFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0, -0.5)
+mesh = SubResource("CapsuleMesh_right_eye")
+material_override = SubResource("ShaderMaterial_right_eye")
+
+[node name="RightEdgeCyan" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/OverlapFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, -0.5)
+mesh = SubResource("CapsuleMesh_left_eye")
+material_override = SubResource("ShaderMaterial_left_eye")
+
+[node name="RightEdgeMagenta" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/OverlapFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, -0.5)
+mesh = SubResource("CapsuleMesh_right_eye")
+material_override = SubResource("ShaderMaterial_right_eye")
 
 [node name="StatsContainer" type="Node3D" parent="XROrigin3D/XRCamera3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
