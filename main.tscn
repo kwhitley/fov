@@ -1,6 +1,17 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=12 format=3 uid="uid://csm02d86ryv2h"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://bl7t5m7s0cqcx" path="res://main.gd" id="1_main"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_capsule"]
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_frame"]
+material = SubResource("StandardMaterial3D_capsule")
+radius = 0.004
+height = 0.3
+
+[sub_resource type="SystemFont" id="SystemFont_stats"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_left"]
 transparency = 1
@@ -20,14 +31,6 @@ material = SubResource("StandardMaterial3D_right")
 radius = 0.03
 height = 0.06
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_capsule"]
-albedo_color = Color(1, 0.9, 0, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_frame"]
-material = SubResource("StandardMaterial3D_capsule")
-radius = 0.004
-height = 0.3
-
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky01"]
 sky_top_color = Color(0.385, 0.455, 0.55, 1)
 sky_horizon_color = Color(0.647, 0.655, 0.671, 1)
@@ -46,8 +49,6 @@ fog_enabled = true
 fog_light_color = Color(0.647, 0.655, 0.671, 1)
 fog_sky_affect = 0.5
 fog_depth_end = 300.0
-
-[sub_resource type="SystemFont" id="SystemFont_stats"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -75,14 +76,25 @@ mesh = SubResource("CapsuleMesh_frame")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, -0.5)
 mesh = SubResource("CapsuleMesh_frame")
 
-[node name="StatsLabel" type="Label3D" parent="XROrigin3D/XRCamera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.12, -0.5)
-pixel_size = 0.001
-text = "FOV Tester
-H: 0.0°
-V: 0.0°"
+[node name="StatsContainer" type="Node3D" parent="XROrigin3D/XRCamera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+
+[node name="StatsLabel" type="Label3D" parent="XROrigin3D/XRCamera3D/StatsContainer"]
+pixel_size = 0.0005
+text = "H: 0.0°
+V: 0.0°
+D: 0.0°"
 font = SubResource("SystemFont_stats")
-font_size = 32
+font_size = 48
+outline_size = 0
+horizontal_alignment = 0
+
+[node name="OffsetLabel" type="Label3D" parent="XROrigin3D/XRCamera3D/StatsContainer"]
+pixel_size = 0.0005
+modulate = Color(1, 1, 1, 0.7)
+font = SubResource("SystemFont_stats")
+font_size = 34
+outline_size = 0
 horizontal_alignment = 0
 
 [node name="LeftController" type="XRController3D" parent="XROrigin3D"]
