@@ -1,0 +1,109 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://main.gd" id="1_main"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_left"]
+transparency = 1
+albedo_color = Color(1, 0.1, 0.1, 0.3)
+
+[sub_resource type="SphereMesh" id="SphereMesh_left"]
+material = SubResource("StandardMaterial3D_left")
+radius = 0.03
+height = 0.06
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_right"]
+transparency = 1
+albedo_color = Color(0.1, 0.8, 1, 0.3)
+
+[sub_resource type="SphereMesh" id="SphereMesh_right"]
+material = SubResource("StandardMaterial3D_right")
+radius = 0.03
+height = 0.06
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_capsule"]
+albedo_color = Color(1, 0.9, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_frame"]
+material = SubResource("StandardMaterial3D_capsule")
+radius = 0.004
+height = 0.3
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky01"]
+sky_top_color = Color(0.385, 0.455, 0.55, 1)
+sky_horizon_color = Color(0.647, 0.655, 0.671, 1)
+ground_horizon_color = Color(0.647, 0.655, 0.671, 1)
+
+[sub_resource type="Sky" id="Sky_sky01"]
+sky_material = SubResource("ProceduralSkyMaterial_sky01")
+
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 2
+sky = SubResource("Sky_sky01")
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.3
+fog_enabled = true
+fog_light_color = Color(0.647, 0.655, 0.671, 1)
+fog_sky_affect = 0.5
+fog_depth_end = 300.0
+
+[sub_resource type="SystemFont" id="SystemFont_stats"]
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="FOVFrame" type="Node3D" parent="XROrigin3D/XRCamera3D"]
+
+[node name="Top" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/FOVFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.5)
+mesh = SubResource("CapsuleMesh_frame")
+
+[node name="Bottom" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/FOVFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -0.5)
+mesh = SubResource("CapsuleMesh_frame")
+
+[node name="Left" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/FOVFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0, -0.5)
+mesh = SubResource("CapsuleMesh_frame")
+
+[node name="Right" type="MeshInstance3D" parent="XROrigin3D/XRCamera3D/FOVFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0, -0.5)
+mesh = SubResource("CapsuleMesh_frame")
+
+[node name="StatsLabel" type="Label3D" parent="XROrigin3D/XRCamera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.12, -0.5)
+pixel_size = 0.001
+text = "FOV Tester
+H: 0.0°
+V: 0.0°"
+font = SubResource("SystemFont_stats")
+font_size = 32
+horizontal_alignment = 0
+
+[node name="LeftController" type="XRController3D" parent="XROrigin3D"]
+tracker = &"left_hand"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/LeftController"]
+mesh = SubResource("SphereMesh_left")
+
+[node name="RightController" type="XRController3D" parent="XROrigin3D"]
+tracker = &"right_hand"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/RightController"]
+mesh = SubResource("SphereMesh_right")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8511228, 0, 0.52496666, -0.14730547, 0.95982486, 0.23882478, -0.50387603, -0.28059968, 0.8169288, 1.9005637, 2, 0.9897159)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_env")
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.80674374, -1.4901161e-08, -0.5909014, 0.16580677, 0.959825, 0.22637202, 0.5671619, -0.2805997, 0.77433276, -2.3162732, 2, 0.9897159)
+light_color = Color(0, 0.54818577, 0.78945106, 1)
+light_energy = 0.297
