@@ -115,7 +115,8 @@ func _process(delta: float) -> void:
 	var offset_changed := false
 
 	if right_grip > 0.5:
-		if abs(right_stick.y) > 0.1:
+		# Vertical offset only in FOV mode
+		if current_mode == TestMode.FOV and abs(right_stick.y) > 0.1:
 			offset_v -= deg_to_rad(right_stick.y * offset_speed * delta)
 			offset_changed = true
 	else:
@@ -123,20 +124,28 @@ func _process(delta: float) -> void:
 		var abs_y: float = absf(right_stick.y)
 		var both_high: bool = abs_x > 0.7 and abs_y > 0.7
 
-		if both_high:
-			rect_half_width += right_stick.x * resize_speed * delta
-			rect_half_width = clamp(rect_half_width, 0.02, 1.0)
-			rect_half_height += right_stick.y * resize_speed * delta
-			rect_half_height = clamp(rect_half_height, 0.02, 1.0)
-			size_changed = true
-		elif abs_x > 0.1 and abs_x >= abs_y:
-			rect_half_width += right_stick.x * resize_speed * delta
-			rect_half_width = clamp(rect_half_width, 0.02, 1.0)
-			size_changed = true
-		elif abs_y > 0.1:
-			rect_half_height += right_stick.y * resize_speed * delta
-			rect_half_height = clamp(rect_half_height, 0.02, 1.0)
-			size_changed = true
+		if current_mode == TestMode.OVERLAP:
+			# Overlap mode: horizontal only
+			if abs_x > 0.1:
+				rect_half_width += right_stick.x * resize_speed * delta
+				rect_half_width = clamp(rect_half_width, 0.02, 1.0)
+				size_changed = true
+		else:
+			# FOV mode: both axes with dominant axis logic
+			if both_high:
+				rect_half_width += right_stick.x * resize_speed * delta
+				rect_half_width = clamp(rect_half_width, 0.02, 1.0)
+				rect_half_height += right_stick.y * resize_speed * delta
+				rect_half_height = clamp(rect_half_height, 0.02, 1.0)
+				size_changed = true
+			elif abs_x > 0.1 and abs_x >= abs_y:
+				rect_half_width += right_stick.x * resize_speed * delta
+				rect_half_width = clamp(rect_half_width, 0.02, 1.0)
+				size_changed = true
+			elif abs_y > 0.1:
+				rect_half_height += right_stick.y * resize_speed * delta
+				rect_half_height = clamp(rect_half_height, 0.02, 1.0)
+				size_changed = true
 
 	if size_changed:
 		_update_active_frame()
@@ -237,7 +246,8 @@ func _update_frame(frame: Node3D) -> void:
 func _update_overlap_lines() -> void:
 	# Four vertical lines - cyan and magenta at each edge (left and right)
 	# Both colors at same position - where both visible = binocular overlap
-	var v_length := 2.0 * (rect_half_height + CAPSULE_RADIUS)
+	# Fixed tall height to extend beyond any vertical FOV
+	var v_length := 2.0
 
 	# Left edge - both cyan (left eye) and magenta (right eye)
 	overlap_left_cyan.position = Vector3(-rect_half_width, 0, -rect_distance)
@@ -277,14 +287,18 @@ func _update_stats() -> void:
 	if current_mode == TestMode.FOV:
 		text = "H: %.1f°\nV: %.1f°\nD: %.1f°" % [h_fov_deg, v_fov_deg, d_fov_deg]
 	else:
-		# In overlap mode, h_fov represents the overlap (distance between lines)
-		text = "OVERLAP\nH: %.1f°\nV: %.1f°" % [h_fov_deg, v_fov_deg]
+		# In overlap mode, show percentage of total FOV
+		# Use the stored FOV measurement as reference
+		var total_fov_rad := 2.0 * atan(fov_half_width / rect_distance)
+		var total_fov_deg := rad_to_deg(total_fov_rad)
+		var overlap_pct := (h_fov_deg / total_fov_deg) * 100.0 if total_fov_deg > 0 else 0.0
+		text = "OVERLAP: %.0f%%\n(%.1f° of %.1f°)" % [overlap_pct, h_fov_deg, total_fov_deg]
 
 	stats_label.text = text
 
-	# Offset shown as smaller parenthetical after V line
+	# Offset shown as smaller parenthetical (only in FOV mode, after V line)
 	var v_offset_deg := rad_to_deg(-offset_v)
-	if abs(v_offset_deg) > 0.1:
+	if current_mode == TestMode.FOV and abs(v_offset_deg) > 0.1:
 		offset_label.text = "(%.1f° offset)" % v_offset_deg
 		offset_label.visible = true
 
@@ -294,16 +308,13 @@ func _update_stats() -> void:
 		var char_width := stats_label.font_size * pixel * offset_description_offset
 		var x_pos := char_count * char_width
 
-		# Adjust Y position based on mode (V line is on different row)
-		var line_height := stats_label.font_size * pixel
-		var y_offset := 0.0 if current_mode == TestMode.FOV else -line_height
-		offset_label.position = Vector3(x_pos, y_offset, 0)
+		offset_label.position = Vector3(x_pos, 0, 0)
 	else:
 		offset_label.text = ""
 		offset_label.visible = false
 
 	# Center the container
-	var longest_line := "OVERLAP TEST" if current_mode == TestMode.OVERLAP else "V: %.1f°" % v_fov_deg
+	var longest_line := "OVERLAP: %.1f°" % h_fov_deg if current_mode == TestMode.OVERLAP else "V: %.1f°" % v_fov_deg
 	var pixel := stats_label.pixel_size
 	var char_width := stats_label.font_size * pixel * offset_description_offset
 	var main_width := longest_line.length() * char_width
