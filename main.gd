@@ -79,12 +79,25 @@ func _process(delta: float) -> void:
 			offset_v -= deg_to_rad(right_stick.y * offset_speed * delta)
 			offset_changed = true
 	else:
-		# Resize mode
-		if abs(right_stick.x) > 0.1:
+		# Resize mode - use dominant axis only, unless both are high (rapid scale)
+		var abs_x: float = absf(right_stick.x)
+		var abs_y: float = absf(right_stick.y)
+		var both_high: bool = abs_x > 0.7 and abs_y > 0.7
+
+		if both_high:
+			# Both axes strong - allow simultaneous scaling
+			rect_half_width += right_stick.x * resize_speed * delta
+			rect_half_width = clamp(rect_half_width, 0.02, 1.0)
+			rect_half_height += right_stick.y * resize_speed * delta
+			rect_half_height = clamp(rect_half_height, 0.02, 1.0)
+			size_changed = true
+		elif abs_x > 0.1 and abs_x >= abs_y:
+			# Horizontal dominant
 			rect_half_width += right_stick.x * resize_speed * delta
 			rect_half_width = clamp(rect_half_width, 0.02, 1.0)
 			size_changed = true
-		if abs(right_stick.y) > 0.1:
+		elif abs_y > 0.1:
+			# Vertical dominant
 			rect_half_height += right_stick.y * resize_speed * delta
 			rect_half_height = clamp(rect_half_height, 0.02, 1.0)
 			size_changed = true
